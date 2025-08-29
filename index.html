@@ -3,109 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jasa Keuangan & Pelatihan</title>
+    <title>Jasa Keuangan & Pembelajaran Google Sheet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Energetic & Calm -->
-    <!-- Application Structure Plan: A clean, modular, and responsive layout with distinct sections for the hero, services, training, and contact information. This vertical structure is ideal for guiding the user through the content in a sequential, logical manner, making the information easy to digest on any device. -->
-    <!-- Visualization & Content Choices: Services -> Goal: Inform -> Presentation: Cards with icons -> Interaction: Hover effect -> Justification: Breaks down services into visually distinct and digestible chunks. Training Panel -> Goal: Inform/Action -> Presentation: Dedicated card with mentor info & price highlight -> Interaction: Direct contact links -> Justification: Clearly presents all key training details in one block. No charts are needed as the content is informational. CONFIRMING NO SVG/Mermaid. -->
+    <!-- Chosen Palette: Blue & Purple Hues -->
+    <!-- Application Structure Plan: Aplikasi ini menggunakan struktur landing page tematik tunggal yang dirancang untuk memandu pengguna secara logis. Alur dimulai dari proposisi nilai di bagian hero, diikuti rincian layanan dan kursus, lalu membangun kepercayaan melalui profil mentor, dan diakhiri dengan ajakan bertindak (CTA) yang jelas. Struktur ini dipilih karena sangat efektif untuk pemasaran jasa, menyajikan semua informasi penting dalam satu alur yang mulus dan mudah dinavigasi tanpa perlu berpindah halaman, sehingga memaksimalkan potensi konversi dan pemahaman pengguna. -->
+    <!-- Visualization & Content Choices: Konten dari poster disajikan menggunakan elemen HTML terstruktur. Layanan dan Kursus diorganisir dalam 'kartu' visual untuk memisahkan informasi (Tujuan: Mengatur). Profil mentor disajikan untuk membangun kepercayaan (Tujuan: Menginformasikan). Ikon Unicode digunakan sebagai pengganti grafis untuk menjaga kecepatan dan kesederhanaan. Interaksi utama adalah navigasi smooth-scroll yang dipicu oleh tautan di header, memungkinkan pengguna melompat ke bagian relevan dengan mudah. Pilihan ini mendukung struktur yang dirancang untuk alur pengguna yang cepat dan efisien. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-bg {
+            background-color: #f7f7f9;
+            background-image: radial-gradient(circle at top right, #e8e8f2 20%, transparent 60%);
+        }
+    </style>
 </head>
-<body class="bg-indigo-50 text-gray-800 font-sans">
+<body class="bg-slate-50 text-slate-800">
 
-    <main class="min-h-screen flex items-center justify-center p-4 sm:p-8">
-        <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-indigo-800">Schizo Finance</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#layanan" class="text-slate-600 hover:text-indigo-700 transition duration-300">Layanan</a>
+                <a href="#kursus" class="text-slate-600 hover:text-indigo-700 transition duration-300">Kursus</a>
+                <a href="#mentor" class="text-slate-600 hover:text-indigo-700 transition duration-300">Mentor</a>
+                <a href="#kontak" class="text-slate-600 hover:text-indigo-700 transition duration-300">Kontak</a>
+            </div>
+            <a href="#kontak" class="hidden md:block bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition duration-300 shadow-md">Daftar Sekarang</a>
+        </nav>
+    </header>
 
-            <!-- Hero & Main CTA -->
-            <div class="lg:col-span-3 text-center mb-6">
-                <h1 class="text-4xl sm:text-5xl font-extrabold text-indigo-800 leading-tight">Solusi Keuangan Anda</h1>
-                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">Kami menyediakan jasa pembukuan, catatan keuangan, dan pelatihan Google Sheets untuk membantu Anda mengelola keuangan dengan lebih mudah dan teratur.</p>
-                <div class="mt-8">
-                    <a href="#kontak" class="inline-block bg-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105">Hubungi Kami untuk Pendaftaran</a>
+    <main>
+        <section id="hero" class="hero-bg py-20 md:py-32">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-slate-900 leading-tight">Perkuat Keuangan Pribadi dan Bisnis Anda</h1>
+                <p class="mt-6 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">Dari layanan keuangan profesional hingga pembelajaran Google Sheet yang praktis, kami siap membantu Anda meraih kendali finansial.</p>
+                <div class="mt-10">
+                    <a href="#layanan" class="bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-indigo-700 transition duration-300 shadow-lg">Jelajahi Solusi Kami</a>
                 </div>
             </div>
+        </section>
 
-            <!-- Services Section -->
-            <div class="lg:col-span-2 p-6 sm:p-8 bg-slate-50 rounded-2xl shadow-inner">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center sm:text-left">Layanan Profesional Kami</h2>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
-                        <div class="text-indigo-600 text-3xl mb-4 text-center">📂</div>
-                        <h3 class="text-xl font-semibold mb-2">Pencatatan Keuangan</h3>
-                        <p class="text-gray-600 text-sm">Pencatatan detail pengeluaran, pemasukan, hingga laporan laba rugi.</p>
+        <section id="layanan" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Layanan Profesional Kami</h2>
+                    <p class="mt-4 text-lg text-slate-600">Solusi akurat dan terpercaya untuk kebutuhan finansial Anda.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+                    <div class="bg-slate-50 p-8 rounded-2xl shadow-md border border-slate-200 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                        <div class="text-4xl mb-4 text-indigo-600">📊</div>
+                        <h3 class="text-2xl font-semibold mb-3">Pembuatan Laporan Keuangan</h3>
+                        <p class="text-slate-600 mb-6 flex-grow">Kami menyusun laporan keuangan yang akurat dan mudah dipahami untuk membantu Anda mengambil keputusan yang lebih baik.</p>
+                        <div class="mt-auto pt-4 border-t border-slate-200">
+                            <p class="text-sm text-slate-500"></p>
+                            <div class="text-2xl font-bold text-indigo-700"></div>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
-                        <div class="text-indigo-600 text-3xl mb-4 text-center">📈</div>
-                        <h3 class="text-xl font-semibold mb-2">Manajemen Arus Kas</h3>
-                        <p class="text-gray-600 text-sm">Memastikan Anda mengetahui kondisi keuangan terkini untuk keputusan bisnis yang lebih baik.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
-                        <div class="text-indigo-600 text-3xl mb-4 text-center">🧾</div>
-                        <h3 class="text-xl font-semibold mb-2">Pembukuan Sederhana</h3>
-                        <p class="text-gray-600 text-sm">Memudahkan Anda memantau setiap transaksi secara efisien dan akurat.</p>
+                    <div class="bg-slate-50 p-8 rounded-2xl shadow-md border border-slate-200 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                        <div class="text-4xl mb-4 text-indigo-600">📝</div>
+                        <h3 class="text-2xl font-semibold mb-3">Pencatatan Keuangan</h3>
+                        <p class="text-slate-600 mb-6 flex-grow">Layanan pencatatan untuk membantu Anda mengelola arus kas dengan rapi dan efisien setiap saat.</p>
+                         <div class="mt-auto pt-4 border-t border-slate-200">
+                            <p class="text-sm text-slate-500"></p>
+                            <div class="text-2xl font-bold text-indigo-700"></div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Training Section -->
-            <div class="p-6 sm:p-8 bg-slate-50 rounded-2xl shadow-inner">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Pelatihan Google Sheets</h2>
-                <div class="bg-white p-6 rounded-2xl shadow-md">
-                    <div class="w-24 h-24 mx-auto rounded-full bg-indigo-100 flex items-center justify-center text-5xl mb-4">👨‍🏫</div>
-                    <h4 class="text-2xl font-bold text-center">Schizo</h4>
-                    <p  class="text-sm text-gray-500 text-center mb-2">Mentor Berpengalaman</p>
-                    <div align=center class="text-sm font-semibold text-center text-white bg-indigo-500 px-3 py-1 rounded-full inline-block mx-auto mb-4">3 Tahun Pengalaman</div>
-                    <p class="text-gray-600 text-sm text-center">Belajar langsung dari ahli dengan sesi 1-on-1 yang interaktif.</p>
+        <section id="kursus" class="py-20 bg-slate-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Ingin Belajar Mengelola Keuangan Sendiri?</h2>
+                    <p class="mt-4 text-lg text-slate-600">Kursus eksklusif kami dirancang untuk pemula yang ingin menguasai keuangan pribadi.</p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-md mt-6">
-                    <h3 class="text-xl font-bold text-center text-indigo-800">Biaya Pembelajaran</h3>
-                    <p class="text-4xl font-extrabold text-center text-indigo-600 mt-2">Rp 1.000.000</p>
-                    <p class="text-sm text-gray-500 text-center mt-2">Biaya berlaku untuk paket pembelajaran awal.</p>
+                <div class="bg-white max-w-4xl mx-auto p-8 md:p-10 rounded-2xl shadow-lg border border-slate-200">
+                    <h3 class="text-2xl font-bold mb-6 text-indigo-800">Apa yang akan Anda Pelajari?</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Dasar-dasar Google Sheet untuk pencatatan keuangan.</span></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Cara membuat anggaran dan melacak pengeluaran.</span></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Analisis data keuangan sederhana.</span></li>
+                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Trik dan tips menggunakan Google Sheet secara efisien.</span></li>
+                    </ul>
+                    <div class="mt-8 pt-6 border-t border-slate-200 text-center">
+                        <p class="text-slate-600 mb-2">Biaya Pendaftaran Kursus</p>
+                        <div class="text-3xl font-bold text-indigo-700">Rp 1.000.000</div>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Training Details & Contact -->
-            <div class="lg:col-span-3">
-                <div class="bg-indigo-600 text-white p-6 sm:p-10 rounded-2xl shadow-xl text-center" id="kontak">
-                    <h2 class="text-2xl sm:text-3xl font-bold mb-4">Hubungi Kami!</h2>
-                    <p class="text-lg mb-6 max-w-2xl mx-auto">Jangan tunda lagi untuk mengelola keuangan Anda. Hubungi kami untuk konsultasi gratis atau pendaftaran.</p>
-                    <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8">
-                        <a href="mailto:shizoxyz@gmail.com" class="flex items-center space-x-2 text-lg hover:text-indigo-200 transition duration-300">
+        <section id="mentor" class="py-20 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-10">Belajar Langsung dari Ahlinya</h2>
+                <div class="max-w-md mx-auto bg-slate-50 p-8 rounded-2xl shadow-md border border-slate-200">
+                     <div class="text-5xl mb-4">👨‍🏫</div>
+                    <h3 class="text-3xl font-bold text-indigo-800">Schizo</h3>
+                    <p class="text-slate-600 mt-2 text-lg">Mentor dengan 3 tahun pengalaman di bidang manajemen keuangan.</p>
+                    <p class="mt-4 text-slate-600">Schizo akan membimbing Anda langkah demi langkah, memastikan Anda menguasai semua materi dengan mudah dan percaya diri.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="kontak" class="py-20 hero-bg">
+            <div class="container mx-auto px-6">
+                <div class="bg-indigo-700 text-white max-w-4xl mx-auto p-10 md:p-12 rounded-2xl shadow-2xl text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold">Ambil Langkah Pertama Anda Hari Ini</h2>
+                    <p class="mt-4 text-lg text-indigo-100 max-w-2xl mx-auto">Hubungi kami sekarang untuk mendaftar layanan atau kursus. Tempat terbatas!</p>
+                    <div class="mt-8 flex flex-col md:flex-row justify-center items-center gap-6 md:gap-10">
+                        <a href="mailto:shizoxyz@gmail.com" class="flex items-center gap-3 text-lg hover:text-indigo-200 transition duration-300">
                             <span class="text-2xl">📧</span>
-                            <span>shizoxyz@gmail.com</span>
+                            shizoxyz@gmail.com
                         </a>
-                        <a href="tel:+6282223031661" class="flex items-center space-x-2 text-lg hover:text-indigo-200 transition duration-300">
+                        <a href="tel:+6282223031661" class="flex items-center gap-3 text-lg hover:text-indigo-200 transition duration-300">
                             <span class="text-2xl">📞</span>
-                            <span>+62 822-2303-1661</span>
+                            +62 822-2303-1661
                         </a>
                     </div>
-                    <p class="mt-6 text-sm text-indigo-200">Berlokasi di Krong Poi Pet, Banteay Meanchey Province, Kamboja.</p>
+                    <div class="mt-10">
+                        <a href="https://wa.me/6282223031661?text=Halo,%20saya%20tertarik%20untuk%20mendaftar." target="_blank" class="bg-white text-indigo-700 px-10 py-4 rounded-full text-lg font-bold hover:bg-indigo-50 transition duration-300 shadow-lg">Daftar via WhatsApp</a>
+                    </div>
                 </div>
             </div>
-
-        </div>
+        </section>
     </main>
-    <footer class="py-4 text-center text-gray-500 text-sm bg-slate-50">
-        <p>&copy; 2025 Solusi Keuangan Anda. Semua Hak Cipta Dilindungi.</p>
+
+    <footer class="bg-slate-900 text-slate-400 py-6">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 Schizo Finance. Semua Hak Cipta Dilindungi.</p>
+        </div>
     </footer>
 
     <script>
-        const navLinks = document.querySelectorAll('a[href^="#"]');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                const targetId = this.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
                 if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 20,
+                    targetElement.scrollIntoView({
                         behavior: 'smooth'
                     });
                 }
             });
         });
     </script>
+
 </body>
 </html>
