@@ -82,27 +82,13 @@
 
         /* Perbaikan untuk visibilitas input pada mode gelap */
         [data-theme='dark'] input {
-            color: #111827; /* Mengatur warna teks input menjadi gelap pada mode malam */
+            color: #f3f4f6;
         }
         input::placeholder {
             color: #9ca3af;
         }
         [data-theme='dark'] input::placeholder {
             color: #d1d5db;
-        }
-
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: #3b82f6;
-            animation: spin 1s ease infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -126,32 +112,24 @@
             </button>
         </div>
 
-        <h1 class="text-3xl font-bold text-center mb-1">Aplikasi Pencatatan Keuangan</h1>
-        <p id="user-id-display" class="text-center text-sm mb-4 text-gray-600 dark:text-gray-400">Nomor Pengguna: <span id="user-id">Memuat...</span></p>
-
-        <!-- Input Nomor Pengguna -->
-        <div class="p-6 bg-card rounded-xl shadow-inner mb-6">
-            <h2 class="text-2xl font-semibold mb-4">Ganti Nomor Pengguna</h2>
-            <div class="flex items-center space-x-4">
-                <input type="text" id="user-id-input" class="flex-1 px-4 py-2 bg-input border border-color-primary rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-color-primary" placeholder="Masukkan ID Pengguna">
-                <button id="load-user-btn" class="px-4 py-2 text-white bg-blue-600 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Muat Data
-                </button>
-            </div>
+        <div class="text-center mb-4 text-sm text-gray-500 dark:text-gray-400">
+            <p>ID Pengguna: <span id="user-id" class="font-mono text-gray-700 dark:text-gray-300 break-all">Memuat...</span></p>
         </div>
 
+        <h1 class="text-3xl font-bold text-center mb-6">Powered by Dacuan.com</h1>
+        
         <!-- Bagian Saldo -->
         <div class="mb-6 text-white p-6 rounded-xl shadow-md" style="background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));">
             <h2 class="text-xl font-semibold">Total Saldo</h2>
-            <p id="total-saldo" class="text-4xl font-extrabold mt-2">฿ 0.00</p>
+            <p id="total-saldo" class="text-4xl font-extrabold mt-2">Rp 0</p>
             <div class="flex justify-between mt-4 text-sm font-medium">
                 <div>
                     <span class="block">Pemasukan</span>
-                    <span id="total-pemasukan" class="text-green-200">฿ 0.00</span>
+                    <span id="total-pemasukan" class="text-green-200">Rp 0</span>
                 </div>
                 <div>
                     <span class="block">Pengeluaran</span>
-                    <span id="total-pengeluaran" class="text-red-200">฿ 0.00</span>
+                    <span id="total-pengeluaran" class="text-red-200">Rp 0</span>
                 </div>
             </div>
         </div>
@@ -161,7 +139,7 @@
             <h2 class="text-2xl font-semibold mb-4">Transaksi Baru</h2>
             <div class="space-y-4">
                 <div>
-                    <label for="jumlah" class="block text-sm font-medium">Jumlah Transaksi (฿)</label>
+                    <label for="jumlah" class="block text-sm font-medium">Jumlah Transaksi (Rp)</label>
                     <input type="text" id="jumlah" class="mt-1 block w-full px-4 py-2 bg-input border border-color-primary rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-color-primary" placeholder="Contoh: 50000" inputmode="numeric" pattern="[0-9]*">
                 </div>
                 <div>
@@ -183,8 +161,9 @@
         <div class="p-6 bg-card rounded-xl shadow-inner">
             <h2 class="text-2xl font-semibold mb-4">Riwayat Transaksi</h2>
             <div id="riwayat-container" class="scrollable-history space-y-4">
-                <div id="loading" class="flex justify-center items-center py-8">
-                    <div class="spinner"></div>
+                <div id="loading-message" class="text-center text-gray-500 py-8">
+                    <p class="mb-2">Sedang memuat data...</p>
+                    <p>Harap tunggu sebentar.</p>
                 </div>
                 <div id="riwayat-empty" class="text-center text-gray-500 py-8 hidden">
                     <p class="mb-2">Belum ada transaksi.</p>
@@ -197,8 +176,19 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, addDoc, deleteDoc, collection, query, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
         
+        // Firebase initialization
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let userId = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             const totalSaldoEl = document.getElementById('total-saldo');
             const totalPemasukanEl = document.getElementById('total-pemasukan');
@@ -210,23 +200,12 @@
             const resetBtn = document.getElementById('reset-btn');
             const riwayatContainer = document.getElementById('riwayat-container');
             const riwayatEmptyEl = document.getElementById('riwayat-empty');
-            const loadingEl = document.getElementById('loading');
+            const loadingMessageEl = document.getElementById('loading-message');
             const themeToggleBtn = document.getElementById('theme-toggle');
             const sunIcon = document.getElementById('sun-icon');
             const moonIcon = document.getElementById('moon-icon');
             const messageBox = document.getElementById('message-box');
-            const userIdDisplayEl = document.getElementById('user-id');
-            const userIdInput = document.getElementById('user-id-input');
-            const loadUserBtn = document.getElementById('load-user-btn');
-
-            // Global variables for Firebase
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-            let db, auth, userId;
-            let transactionRef;
-            let currentUnsubscribe = null;
+            const userIdEl = document.getElementById('user-id');
 
             // Function untuk menampilkan pesan di UI
             const showMessage = (message, type = 'error') => {
@@ -238,63 +217,125 @@
                 }, 3000);
             };
 
-            // Function untuk format angka menjadi Baht Thailand
-            const formatBaht = (number) => {
-                return new Intl.NumberFormat('th-TH', {
+            // Function untuk format angka menjadi Rupiah
+            const formatRupiah = (number) => {
+                return new Intl.NumberFormat('id-ID', {
                     style: 'currency',
-                    currency: 'THB',
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
                 }).format(number);
             };
 
-            // Function untuk merender transaksi di UI
-            const renderTransactions = (data) => {
+            // Logika untuk mode terang dan gelap
+            const toggleTheme = () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                updateIcons(newTheme);
+            };
+
+            const updateIcons = (theme) => {
+                if (theme === 'dark') {
+                    moonIcon.classList.remove('hidden');
+                    sunIcon.classList.add('hidden');
+                } else {
+                    moonIcon.classList.add('hidden');
+                    sunIcon.classList.remove('hidden');
+                }
+            };
+
+            // Inisialisasi tema saat memuat halaman
+            const savedTheme = 'light'; // Default to light theme for a fresh start
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateIcons(savedTheme);
+            themeToggleBtn.addEventListener('click', toggleTheme);
+
+            // Authentication & data listener
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    userIdEl.textContent = userId;
+                    const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
+                    const q = query(collection(db, transactionsCollectionPath));
+
+                    onSnapshot(q, (snapshot) => {
+                        const riwayatTransaksi = [];
+                        snapshot.forEach((doc) => {
+                            riwayatTransaksi.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        // Sort by timestamp if needed, for now Firestore handles order.
+                        updateUI(riwayatTransaksi);
+                        loadingMessageEl.classList.add('hidden');
+                    }, (error) => {
+                        console.error("Error getting transactions: ", error);
+                        showMessage("Gagal memuat data. Periksa koneksi Anda.", "error");
+                        loadingMessageEl.classList.add('hidden');
+                        riwayatEmptyEl.classList.remove('hidden');
+                    });
+                } else {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Auth error:", error);
+                        showMessage("Gagal masuk. Silakan coba lagi.", "error");
+                        loadingMessageEl.classList.add('hidden');
+                        riwayatEmptyEl.classList.remove('hidden');
+                    }
+                }
+            });
+
+            // Function untuk memperbarui UI
+            const updateUI = (riwayatTransaksi) => {
                 let totalSaldo = 0;
                 let totalPemasukan = 0;
                 let totalPengeluaran = 0;
-                
-                data.forEach(transaksi => {
+
+                // Sort the transactions by timestamp in descending order
+                riwayatTransaksi.sort((a, b) => b.timestamp - a.timestamp);
+
+                riwayatTransaksi.forEach(transaksi => {
                     if (transaksi.tipe === 'tambah') {
+                        totalSaldo += transaksi.jumlah;
                         totalPemasukan += transaksi.jumlah;
                     } else {
+                        totalSaldo -= transaksi.jumlah;
                         totalPengeluaran += transaksi.jumlah;
                     }
                 });
-                totalSaldo = totalPemasukan - totalPengeluaran;
 
-                totalSaldoEl.textContent = formatBaht(totalSaldo);
-                totalPemasukanEl.textContent = formatBaht(totalPemasukan);
-                totalPengeluaranEl.textContent = formatBaht(totalPengeluaran);
+                totalSaldoEl.textContent = formatRupiah(totalSaldo);
+                totalPemasukanEl.textContent = formatRupiah(totalPemasukan);
+                totalPengeluaranEl.textContent = formatRupiah(totalPengeluaran);
                 
                 riwayatContainer.innerHTML = '';
-                if (data.length === 0) {
-                    riwayatEmptyEl.style.display = 'block';
+                if (riwayatTransaksi.length === 0) {
+                    riwayatEmptyEl.classList.remove('hidden');
                 } else {
-                    riwayatEmptyEl.style.display = 'none';
-                    data.sort((a, b) => b.timestamp - a.timestamp); // Urutkan berdasarkan waktu
-                    data.forEach((transaksi) => {
+                    riwayatEmptyEl.classList.add('hidden');
+                    riwayatTransaksi.forEach((transaksi) => {
                         const isPositive = transaksi.tipe === 'tambah';
                         const item = document.createElement('div');
                         item.classList.add('flex', 'justify-between', 'items-center', 'p-4', 'rounded-lg', 'shadow-sm', 'transition-all', 'duration-300', isPositive ? 'bg-green-100' : 'bg-red-100', 'dark:bg-gray-700', 'hover:scale-105');
                         
-                        // Menyesuaikan warna teks untuk mode gelap pada riwayat
                         const textColorClass = 'dark:text-white';
                         const keteranganColorClass = 'dark:text-gray-300';
-                        
-                        const mutasiSaldo = isPositive ? transaksi.jumlah : -transaksi.jumlah;
+                        const mutasiSaldo = isPositive ? `+ ${formatRupiah(transaksi.jumlah)}` : `- ${formatRupiah(transaksi.jumlah)}`;
 
                         item.innerHTML = `
                             <div class="flex-1">
                                 <p class="text-lg font-semibold text-gray-800 ${textColorClass}">${transaksi.keterangan}</p>
-                                <p class="text-sm text-gray-600 mt-1 ${keteranganColorClass}">${transaksi.tanggal} - ${transaksi.jam}</p>
+                                <p class="text-sm text-gray-600 mt-1 ${keteranganColorClass}">${new Date(transaksi.timestamp).toLocaleString('id-ID')}</p>
                             </div>
                             <div class="flex items-center space-x-4">
                                 <div class="text-right">
-                                    <p class="text-lg font-bold ${isPositive ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">${isPositive ? '+' : '-'} ${formatBaht(transaksi.jumlah)}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-300">Mutasi Saldo: ${formatBaht(mutasiSaldo)}</p>
+                                    <p class="text-lg font-bold ${isPositive ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">${mutasiSaldo}</p>
                                 </div>
-                                <button data-doc-id="${transaksi.id}" class="delete-btn p-2 rounded-full text-red-600 hover:bg-red-200 transition-colors">
+                                <button data-id="${transaksi.id}" class="delete-btn p-2 rounded-full text-red-600 hover:bg-red-200 transition-colors dark:text-red-400 dark:hover:bg-gray-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
                                     </svg>
@@ -306,73 +347,27 @@
                     
                     document.querySelectorAll('.delete-btn').forEach(button => {
                         button.addEventListener('click', (e) => {
-                            const docId = e.currentTarget.getAttribute('data-doc-id');
-                            deleteTransaction(docId);
+                            const id = e.currentTarget.getAttribute('data-id');
+                            deleteTransaction(id);
                         });
                     });
                 }
             };
 
-            // Logika untuk memuat data pengguna berdasarkan ID
-            const loadUserData = (newId) => {
-                if (!db) {
-                    showMessage('Sistem belum siap. Mohon tunggu.');
-                    return;
-                }
-
-                // Cek apakah ID yang dimasukkan valid (contoh: tidak kosong)
-                if (!newId || newId.trim() === '') {
-                    showMessage('Mohon masukkan ID Pengguna yang valid.');
-                    return;
-                }
-                
-                // Hentikan listener sebelumnya jika ada
-                if (currentUnsubscribe) {
-                    currentUnsubscribe();
-                }
-
-                userId = newId.trim();
-                userIdDisplayEl.textContent = userId;
-                userIdInput.value = '';
-
-                // Tampilkan spinner loading
-                loadingEl.style.display = 'flex';
-                riwayatEmptyEl.style.display = 'none';
-                
-                // Set path Firestore baru
-                transactionRef = collection(db, `artifacts/${appId}/users/${userId}/keuangan`);
-                
-                // Atur listener real-time baru
-                currentUnsubscribe = onSnapshot(transactionRef, (snapshot) => {
-                    loadingEl.style.display = 'none';
-                    const transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderTransactions(transactions);
-                }, (error) => {
-                    console.error("Error fetching data:", error);
-                    showMessage("Gagal memuat data. Periksa koneksi Anda atau pastikan ID pengguna benar.");
-                    loadingEl.style.display = 'none';
-                    renderTransactions([]);
-                });
-            };
-
-            // Logika untuk menghapus transaksi dari Firestore
-            const deleteTransaction = async (docId) => {
-                if (!db || !userId) return;
+            // Function untuk menghapus transaksi
+            const deleteTransaction = async (id) => {
+                const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
                 try {
-                    await deleteDoc(doc(transactionRef, docId));
+                    await deleteDoc(doc(db, transactionsCollectionPath, id));
                     showMessage('Transaksi berhasil dihapus!', 'success');
                 } catch (e) {
-                    console.error("Error deleting document: ", e);
-                    showMessage('Gagal menghapus transaksi.');
+                    console.error("Error removing document: ", e);
+                    showMessage("Gagal menghapus transaksi.", "error");
                 }
             };
 
-            // Logika untuk menangani transaksi dan menyimpannya ke Firestore
+            // Function untuk menangani transaksi
             const handleTransaction = async (type) => {
-                if (!db || !userId) {
-                    showMessage('Mohon muat data pengguna terlebih dahulu.');
-                    return;
-                }
                 const jumlah = parseFloat(jumlahInput.value);
                 const keterangan = keteranganInput.value.trim();
 
@@ -386,115 +381,62 @@
                     return;
                 }
 
-                const date = new Date();
-                const tanggal = date.toLocaleDateString('id-ID', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                const jam = date.toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
+                if (!userId) {
+                    showMessage("Autentikasi gagal. Silakan muat ulang halaman.", "error");
+                    return;
+                }
 
+                const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
                 const transaksi = {
                     jumlah: jumlah,
                     keterangan: keterangan,
                     tipe: type,
-                    tanggal: tanggal,
-                    jam: jam,
                     timestamp: Date.now()
                 };
                 
                 try {
-                    await addDoc(transactionRef, transaksi);
+                    await addDoc(collection(db, transactionsCollectionPath), transaksi);
                     jumlahInput.value = '';
                     keteranganInput.value = '';
                     showMessage('Transaksi berhasil!', 'success');
                 } catch (e) {
                     console.error("Error adding document: ", e);
-                    showMessage('Gagal menambahkan transaksi.');
+                    showMessage("Gagal menyimpan transaksi.", "error");
                 }
             };
 
-            // Logika untuk mereset semua data di Firestore
+            // Logika untuk mereset semua data
             const resetData = async () => {
-                if (!db || !userId) return;
+                if (!userId) {
+                    showMessage("Autentikasi gagal. Tidak dapat mereset data.", "error");
+                    return;
+                }
+
+                const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
                 try {
-                    const batch = writeBatch(db);
-                    const querySnapshot = await getDocs(transactionRef);
-                    querySnapshot.forEach((doc) => {
-                        batch.delete(doc.ref);
+                    const q = query(collection(db, transactionsCollectionPath));
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (querySnapshot.empty) {
+                        showMessage('Tidak ada data untuk direset.', 'success');
+                        return;
+                    }
+                    
+                    const batch = db.batch();
+                    querySnapshot.forEach((document) => {
+                        batch.delete(document.ref);
                     });
                     await batch.commit();
                     showMessage('Semua data telah direset!', 'success');
                 } catch (e) {
-                    console.error("Error resetting data: ", e);
-                    showMessage('Gagal mereset data.');
+                    console.error("Error resetting documents: ", e);
+                    showMessage("Gagal mereset data.", "error");
                 }
             };
-
-            // Logika untuk mode terang dan gelap
-            const toggleTheme = () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateIcons(newTheme);
-            };
-
-            const updateIcons = (theme) => {
-                if (theme === 'dark') {
-                    moonIcon.classList.add('hidden');
-                    sunIcon.classList.remove('hidden');
-                } else {
-                    moonIcon.classList.remove('hidden');
-                    sunIcon.classList.add('hidden');
-                }
-            };
-            
-            // Inisialisasi tema saat memuat halaman
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateIcons(savedTheme);
 
             tambahBtn.addEventListener('click', () => handleTransaction('tambah'));
             kurangBtn.addEventListener('click', () => handleTransaction('kurang'));
             resetBtn.addEventListener('click', resetData);
-            themeToggleBtn.addEventListener('click', toggleTheme);
-            loadUserBtn.addEventListener('click', () => loadUserData(userIdInput.value));
-
-            // Inisialisasi Firebase dan otentikasi
-            const initFirebase = async () => {
-                try {
-                    const app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-                    
-                    // Lakukan otentikasi awal dan muat data
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            // Muat data untuk pengguna yang sudah ada
-                            loadUserData(user.uid);
-                        } else {
-                            console.log("Pengguna keluar.");
-                            loadingEl.style.display = 'none';
-                        }
-                    });
-                } catch (e) {
-                    console.error("Gagal menginisialisasi Firebase:", e);
-                    showMessage("Gagal menginisialisasi sistem. Coba segarkan halaman.");
-                }
-            };
-
-            initFirebase();
         });
     </script>
 </body>
