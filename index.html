@@ -1,162 +1,377 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jasa Keuangan & Pembelajaran Google Sheet</title>
+    <title>Aplikasi Pencatatan Keuangan</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Blue & Purple Hues -->
-    <!-- Application Structure Plan: Aplikasi ini menggunakan struktur landing page tematik tunggal yang dirancang untuk memandu pengguna secara logis. Alur dimulai dari proposisi nilai di bagian hero, diikuti rincian layanan dan kursus, lalu membangun kepercayaan melalui profil mentor, dan diakhiri dengan ajakan bertindak (CTA) yang jelas. Struktur ini dipilih karena sangat efektif untuk pemasaran jasa, menyajikan semua informasi penting dalam satu alur yang mulus dan mudah dinavigasi tanpa perlu berpindah halaman, sehingga memaksimalkan potensi konversi dan pemahaman pengguna. -->
-    <!-- Visualization & Content Choices: Konten dari poster disajikan menggunakan elemen HTML terstruktur. Layanan dan Kursus diorganisir dalam 'kartu' visual untuk memisahkan informasi (Tujuan: Mengatur). Profil mentor disajikan untuk membangun kepercayaan (Tujuan: Menginformasikan). Ikon Unicode digunakan sebagai pengganti grafis untuk menjaga kecepatan dan kesederhanaan. Interaksi utama adalah navigasi smooth-scroll yang dipicu oleh tautan di header, memungkinkan pengguna melompat ke bagian relevan dengan mudah. Pilihan ini mendukung struktur yang dirancang untuk alur pengguna yang cepat dan efisien. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        /* Tema Dasar */
+        :root {
+            --bg-color: #f3f4f6;
+            --container-bg: rgba(255, 255, 255, 0.7);
+            --text-color: #1f2937;
+            --card-bg: #f9fafb;
+            --input-bg: #f9fafb;
+            --border-color: #e5e7eb;
+            --gradient-start: #10b981; /* Hijau */
+            --gradient-end: #059669; /* Hijau lebih gelap */
+        }
+
+        /* Tema Gelap */
+        [data-theme='dark'] {
+            --bg-color: #111827;
+            --container-bg: rgba(31, 41, 55, 0.7);
+            --text-color: #f3f4f6;
+            --card-bg: #374151;
+            --input-bg: #374151;
+            --border-color: #4b5563;
+            --gradient-start: #047857; /* Hijau tua */
+            --gradient-end: #065f46; /* Hijau sangat tua */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            transition: background-color 0.3s;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: linear-gradient(135deg, #a8dadc, #457b9d, #1d3557);
         }
-        .hero-bg {
-            background-color: #f7f7f9;
-            background-image: radial-gradient(circle at top right, #e8e8f2 20%, transparent 60%);
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 1.5rem;
+            background-color: var(--container-bg);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .scrollable-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .text-color-primary { color: var(--text-color); }
+        .bg-card { background-color: var(--card-bg); transition: background-color 0.3s; }
+        .border-color-primary { border-color: var(--border-color); }
+
+        /* Custom Alert */
+        #message-box {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s, transform 0.5s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        #message-box.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Perbaikan untuk visibilitas input pada mode gelap */
+        [data-theme='dark'] input {
+            color: #111827; /* Mengatur warna teks input menjadi gelap pada mode malam */
+        }
+        input::placeholder {
+            color: #9ca3af;
+        }
+        [data-theme='dark'] input::placeholder {
+            color: #d1d5db;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body data-theme="light" class="flex items-center justify-center min-h-screen">
+    
+    <div id="message-box" class="bg-red-500 text-white font-medium"></div>
 
-    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-indigo-800">Schizo Finance</a>
-            <div class="hidden md:flex space-x-8">
-                <a href="#layanan" class="text-slate-600 hover:text-indigo-700 transition duration-300">Layanan</a>
-                <a href="#kursus" class="text-slate-600 hover:text-indigo-700 transition duration-300">Kursus</a>
-                <a href="#mentor" class="text-slate-600 hover:text-indigo-700 transition duration-300">Mentor</a>
-                <a href="#kontak" class="text-slate-600 hover:text-indigo-700 transition duration-300">Kontak</a>
-            </div>
-            <a href="#kontak" class="hidden md:block bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition duration-300 shadow-md">Daftar Sekarang</a>
-        </nav>
-    </header>
-
-    <main>
-        <section id="hero" class="hero-bg py-20 md:py-32">
-            <div class="container mx-auto px-6 text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-slate-900 leading-tight">Perkuat Keuangan Pribadi dan Bisnis Anda</h1>
-                <p class="mt-6 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">Dari layanan keuangan profesional hingga pembelajaran Google Sheet yang praktis, kami siap membantu Anda meraih kendali finansial.</p>
-                <div class="mt-10">
-                    <a href="#layanan" class="bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-indigo-700 transition duration-300 shadow-lg">Jelajahi Solusi Kami</a>
-                </div>
-            </div>
-        </section>
-
-        <section id="layanan" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Layanan Profesional Kami</h2>
-                    <p class="mt-4 text-lg text-slate-600">Solusi akurat dan terpercaya untuk kebutuhan finansial Anda.</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
-                    <div class="bg-slate-50 p-8 rounded-2xl shadow-md border border-slate-200 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
-                        <div class="text-4xl mb-4 text-indigo-600">📊</div>
-                        <h3 class="text-2xl font-semibold mb-3">Pembuatan Laporan Keuangan</h3>
-                        <p class="text-slate-600 mb-6 flex-grow">Kami menyusun laporan keuangan yang akurat dan mudah dipahami untuk membantu Anda mengambil keputusan yang lebih baik.</p>
-                        <div class="mt-auto pt-4 border-t border-slate-200">
-                            <p class="text-sm text-slate-500"></p>
-                            <div class="text-2xl font-bold text-indigo-700"></div>
-                        </div>
-                    </div>
-                    <div class="bg-slate-50 p-8 rounded-2xl shadow-md border border-slate-200 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
-                        <div class="text-4xl mb-4 text-indigo-600">📝</div>
-                        <h3 class="text-2xl font-semibold mb-3">Pencatatan Keuangan</h3>
-                        <p class="text-slate-600 mb-6 flex-grow">Layanan pencatatan untuk membantu Anda mengelola arus kas dengan rapi dan efisien setiap saat.</p>
-                         <div class="mt-auto pt-4 border-t border-slate-200">
-                            <p class="text-sm text-slate-500"></p>
-                            <div class="text-2xl font-bold text-indigo-700"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="kursus" class="py-20 bg-slate-50">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Ingin Belajar Mengelola Keuangan Sendiri?</h2>
-                    <p class="mt-4 text-lg text-slate-600">Kursus eksklusif kami dirancang untuk pemula yang ingin menguasai keuangan pribadi.</p>
-                </div>
-                <div class="bg-white max-w-4xl mx-auto p-8 md:p-10 rounded-2xl shadow-lg border border-slate-200">
-                    <h3 class="text-2xl font-bold mb-6 text-indigo-800">Apa yang akan Anda Pelajari?</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Dasar-dasar Google Sheet untuk pencatatan keuangan.</span></li>
-                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Cara membuat anggaran dan melacak pengeluaran.</span></li>
-                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Analisis data keuangan sederhana.</span></li>
-                        <li class="flex items-start"><span class="text-indigo-500 mr-4 mt-1">✔</span><span class="text-slate-700">Trik dan tips menggunakan Google Sheet secara efisien.</span></li>
-                    </ul>
-                    <div class="mt-8 pt-6 border-t border-slate-200 text-center">
-                        <p class="text-slate-600 mb-2">Biaya kursus dan pembelajaran selama 2 bulan</p>
-                        <div class="text-3xl font-bold text-indigo-700">Rp 1.000.000</div>
-                        <div class="mt-6">
-                            <a href="#kontak" class="bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-indigo-700 transition duration-300 shadow-lg">Daftar Sekarang</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="mentor" class="py-20 bg-white">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-10">Belajar Langsung dari Ahlinya</h2>
-                <div class="max-w-md mx-auto bg-slate-50 p-8 rounded-2xl shadow-md border border-slate-200">
-                     <div class="text-5xl mb-4">👨‍🏫</div>
-                    <h3 class="text-3xl font-bold text-indigo-800">Schizo</h3>
-                    <p class="text-slate-600 mt-2 text-lg">Mentor dengan 3 tahun pengalaman di bidang manajemen keuangan.</p>
-                    <p class="mt-4 text-slate-600">Schizo akan membimbing Anda langkah demi langkah, memastikan Anda menguasai semua materi dengan mudah dan percaya diri.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="kontak" class="py-20 hero-bg">
-            <div class="container mx-auto px-6">
-                <div class="bg-indigo-700 text-white max-w-4xl mx-auto p-10 md:p-12 rounded-2xl shadow-2xl text-center">
-                    <h2 class="text-3xl md:text-4xl font-bold">Ambil Langkah Pertama Anda Hari Ini</h2>
-                    <p class="mt-4 text-lg text-indigo-100 max-w-2xl mx-auto">Hubungi kami sekarang untuk mendaftar layanan atau kursus. Tempat terbatas!</p>
-                    <div class="mt-8 flex flex-col md:flex-row justify-center items-center gap-6 md:gap-10">
-                        <a href="mailto:shizoxyz@gmail.com" class="flex items-center gap-3 text-lg hover:text-indigo-200 transition duration-300">
-                            <span class="text-2xl">📧</span>
-                            shizoxyz@gmail.com
-                        </a>
-                        <a href="tel:+6282223031661" class="flex items-center gap-3 text-lg hover:text-indigo-200 transition duration-300">
-                            <span class="text-2xl">📞</span>
-                            +62 822-2303-1661
-                        </a>
-                    </div>
-                    <div class="mt-10">
-                        <a href="https://wa.me/6282223031661?text=Halo,%20saya%20tertarik%20untuk%20mendaftar." target="_blank" class="bg-white text-indigo-700 px-10 py-4 rounded-full text-lg font-bold hover:bg-indigo-50 transition duration-300 shadow-lg">Daftar via WhatsApp</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="bg-slate-900 text-slate-400 py-6">
-        <div class="container mx-auto px-6 text-center">
-            <p>&copy; 2025 Schizo Finance. Semua Hak Cipta Dilindungi.</p>
+    <div class="container mx-auto p-6 text-color-primary">
+        <!-- Tombol Mode Terang/Gelap dan Reset -->
+        <div class="flex justify-between items-center mb-4">
+            <button id="reset-btn" class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200">
+                Reset
+            </button>
+            <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                <svg id="sun-icon" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="moon-icon" class="h-6 w-6 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
         </div>
-    </footer>
+
+        <h1 class="text-3xl font-bold text-center mb-6">Powered by Dacuan.com</h1>
+        
+        <!-- Bagian Saldo -->
+        <div class="mb-6 text-white p-6 rounded-xl shadow-md" style="background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));">
+            <h2 class="text-xl font-semibold">Total Saldo</h2>
+            <p id="total-saldo" class="text-4xl font-extrabold mt-2">฿ 0.00</p>
+            <div class="flex justify-between mt-4 text-sm font-medium">
+                <div>
+                    <span class="block">Pemasukan</span>
+                    <span id="total-pemasukan" class="text-green-200">฿ 0.00</span>
+                </div>
+                <div>
+                    <span class="block">Pengeluaran</span>
+                    <span id="total-pengeluaran" class="text-red-200">฿ 0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bagian Input Transaksi -->
+        <div class="p-6 bg-card rounded-xl shadow-inner mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Transaksi Baru</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="jumlah" class="block text-sm font-medium">Jumlah Transaksi (฿)</label>
+                    <input type="text" id="jumlah" class="mt-1 block w-full px-4 py-2 bg-input border border-color-primary rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-color-primary" placeholder="Contoh: 50000" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <div>
+                    <label for="keterangan" class="block text-sm font-medium">Keterangan</label>
+                    <input type="text" id="keterangan" class="mt-1 block w-full px-4 py-2 bg-input border border-color-primary rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-color-primary" placeholder="Contoh: Belanja Bulanan">
+                </div>
+                <div class="flex space-x-4">
+                    <button id="tambah-btn" class="flex-1 w-full px-4 py-2 text-white bg-green-600 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Tambah Saldo
+                    </button>
+                    <button id="kurang-btn" class="flex-1 w-full px-4 py-2 text-white bg-red-600 rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        Kurangi Saldo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bagian Riwayat Transaksi -->
+        <div class="p-6 bg-card rounded-xl shadow-inner">
+            <h2 class="text-2xl font-semibold mb-4">Riwayat Transaksi</h2>
+            <div id="riwayat-container" class="scrollable-history space-y-4">
+                <div id="riwayat-empty" class="text-center text-gray-500 py-8">
+                    <p class="mb-2">Belum ada transaksi.</p>
+                    <p>Mulai catat keuangan Anda!</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
+        document.addEventListener('DOMContentLoaded', () => {
+            const totalSaldoEl = document.getElementById('total-saldo');
+            const totalPemasukanEl = document.getElementById('total-pemasukan');
+            const totalPengeluaranEl = document.getElementById('total-pengeluaran');
+            const jumlahInput = document.getElementById('jumlah');
+            const keteranganInput = document.getElementById('keterangan');
+            const tambahBtn = document.getElementById('tambah-btn');
+            const kurangBtn = document.getElementById('kurang-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const riwayatContainer = document.getElementById('riwayat-container');
+            const riwayatEmptyEl = document.getElementById('riwayat-empty');
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            const messageBox = document.getElementById('message-box');
+
+            let totalSaldo = 0;
+            let totalPemasukan = 0;
+            let totalPengeluaran = 0;
+            let riwayatTransaksi = [];
+
+            // Function untuk menampilkan pesan di UI
+            const showMessage = (message, type = 'error') => {
+                messageBox.textContent = message;
+                messageBox.classList.remove('bg-red-500', 'bg-green-500');
+                messageBox.classList.add(type === 'error' ? 'bg-red-500' : 'bg-green-500', 'show');
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, 3000);
+            };
+
+            // Function untuk format angka menjadi Baht Thailand
+            const formatBaht = (number) => {
+                return new Intl.NumberFormat('th-TH', {
+                    style: 'currency',
+                    currency: 'THB',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(number);
+            };
+
+            // Function untuk memperbarui UI
+            const updateUI = () => {
+                totalSaldoEl.textContent = formatBaht(totalSaldo);
+                totalPemasukanEl.textContent = formatBaht(totalPemasukan);
+                totalPengeluaranEl.textContent = formatBaht(totalPengeluaran);
+                
+                riwayatContainer.innerHTML = '';
+                if (riwayatTransaksi.length === 0) {
+                    riwayatEmptyEl.style.display = 'block';
+                } else {
+                    riwayatEmptyEl.style.display = 'none';
+                    riwayatTransaksi.forEach((transaksi) => {
+                        const isPositive = transaksi.tipe === 'tambah';
+                        const item = document.createElement('div');
+                        item.classList.add('flex', 'justify-between', 'items-center', 'p-4', 'rounded-lg', 'shadow-sm', 'transition-all', 'duration-300', isPositive ? 'bg-green-100' : 'bg-red-100', 'dark:bg-gray-700', 'hover:scale-105');
+                        
+                        // Menyesuaikan warna teks untuk mode gelap pada riwayat
+                        const textColorClass = 'dark:text-white';
+                        const keteranganColorClass = 'dark:text-gray-300';
+
+                        item.innerHTML = `
+                            <div class="flex-1">
+                                <p class="text-lg font-semibold text-gray-800 ${textColorClass}">${transaksi.keterangan}</p>
+                                <p class="text-sm text-gray-600 mt-1 ${keteranganColorClass}">${transaksi.tanggal} - ${transaksi.jam}</p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-right">
+                                    <p class="text-lg font-bold ${isPositive ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">${isPositive ? '+' : '-'} ${formatBaht(transaksi.jumlah)}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-300">Mutasi Saldo: ${formatBaht(transaksi.mutasiSaldo)}</p>
+                                </div>
+                                <button data-id="${transaksi.id}" class="delete-btn p-2 rounded-full text-red-600 hover:bg-red-200 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                        riwayatContainer.prepend(item);
+                    });
+                    
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const id = e.currentTarget.getAttribute('data-id');
+                            deleteTransaction(parseInt(id));
+                        });
                     });
                 }
-            });
+            };
+
+            // Function untuk menghapus transaksi
+            const deleteTransaction = (id) => {
+                const transaksiDihapus = riwayatTransaksi.find(t => t.id === id);
+                if (!transaksiDihapus) return;
+
+                if (transaksiDihapus.tipe === 'tambah') {
+                    totalSaldo -= transaksiDihapus.jumlah;
+                    totalPemasukan -= transaksiDihapus.jumlah;
+                } else {
+                    totalSaldo += transaksiDihapus.jumlah;
+                    totalPengeluaran -= transaksiDihapus.jumlah;
+                }
+
+                riwayatTransaksi = riwayatTransaksi.filter(t => t.id !== id);
+                updateUI();
+                showMessage('Transaksi berhasil dihapus!', 'success');
+            };
+
+            // Function untuk menangani transaksi
+            const handleTransaction = (type) => {
+                const jumlah = parseFloat(jumlahInput.value);
+                const keterangan = keteranganInput.value.trim();
+
+                if (isNaN(jumlah) || jumlah <= 0) {
+                    showMessage('Mohon masukkan jumlah yang valid.');
+                    return;
+                }
+                
+                if (keterangan === '') {
+                    showMessage('Mohon masukkan keterangan transaksi.');
+                    return;
+                }
+
+                const date = new Date();
+                const tanggal = date.toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const jam = date.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                let mutasiSaldo = 0;
+                
+                if (type === 'tambah') {
+                    totalSaldo += jumlah;
+                    totalPemasukan += jumlah;
+                    mutasiSaldo = jumlah;
+                } else {
+                    totalSaldo -= jumlah;
+                    totalPengeluaran += jumlah;
+                    mutasiSaldo = -jumlah;
+                }
+
+                const transaksi = {
+                    id: Date.now(), // ID unik untuk setiap transaksi
+                    jumlah: jumlah,
+                    keterangan: keterangan,
+                    tipe: type,
+                    tanggal: tanggal,
+                    jam: jam,
+                    mutasiSaldo: mutasiSaldo
+                };
+                
+                riwayatTransaksi.push(transaksi);
+                updateUI();
+                
+                jumlahInput.value = '';
+                keteranganInput.value = '';
+                showMessage('Transaksi berhasil!', 'success');
+            };
+
+            // Logika untuk mereset semua data
+            const resetData = () => {
+                totalSaldo = 0;
+                totalPemasukan = 0;
+                totalPengeluaran = 0;
+                riwayatTransaksi = [];
+                updateUI();
+                showMessage('Semua data telah direset!', 'success');
+            };
+
+            // Logika untuk mode terang dan gelap
+            const toggleTheme = () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateIcons(newTheme);
+            };
+
+            const updateIcons = (theme) => {
+                if (theme === 'dark') {
+                    moonIcon.classList.add('hidden');
+                    sunIcon.classList.remove('hidden');
+                } else {
+                    moonIcon.classList.remove('hidden');
+                    sunIcon.classList.add('hidden');
+                }
+            };
+            
+            // Inisialisasi tema saat memuat halaman
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateIcons(savedTheme);
+
+            tambahBtn.addEventListener('click', () => handleTransaction('tambah'));
+            kurangBtn.addEventListener('click', () => handleTransaction('kurang'));
+            resetBtn.addEventListener('click', resetData);
+            themeToggleBtn.addEventListener('click', toggleTheme);
+
+            updateUI(); // Inisialisasi tampilan awal
         });
     </script>
-
 </body>
 </html>
