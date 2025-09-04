@@ -1,3 +1,3 @@
-# Jasa-pembelajaran-google-sheet
+# Jasa-pembuatan-laporan-keuangan
 
 Modul pembelajaran terpadu mengenai pengelolaan keuangan dan mengatur aliran dana pribadi dengan cerdas dan cermat dengan cara mencatat keuangan kita sendiri
