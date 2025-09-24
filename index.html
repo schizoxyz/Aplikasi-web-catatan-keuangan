@@ -3,440 +3,449 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Pencatatan Keuangan</title>
+    <title>Jasa Bikin Spreadsheet Keren</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        /* Tema Dasar */
-        :root {
-            --bg-color: #f3f4f6;
-            --container-bg: rgba(255, 255, 255, 0.7);
-            --text-color: #1f2937;
-            --card-bg: #f9fafb;
-            --input-bg: #f9fafb;
-            --border-color: #e5e7eb;
-            --gradient-start: #10b981; /* Hijau */
-            --gradient-end: #059669; /* Hijau lebih gelap */
-        }
-
-        /* Tema Gelap */
-        [data-theme='dark'] {
-            --bg-color: #111827;
-            --container-bg: rgba(31, 41, 55, 0.7);
-            --text-color: #f3f4f6;
-            --card-bg: #374151;
-            --input-bg: #374151;
-            --border-color: #4b5563;
-            --gradient-start: #047857; /* Hijau tua */
-            --gradient-end: #065f46; /* Hijau sangat tua */
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            transition: background-color 0.3s;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: linear-gradient(135deg, #a8dadc, #457b9d, #1d3557);
+            background-color: #F8F9FA; /* Off-white yang lembut */
+            color: #212529;
+            transition: background-color 0.5s ease-in-out;
         }
-        .container {
-            max-width: 600px;
+        h1, h2, h3 {
+            font-family: 'Inter', sans-serif;
+            color: #004080;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #E9ECEF;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
             width: 100%;
-            padding: 1.5rem;
-            background-color: var(--container-bg);
-            border-radius: 1rem;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            transition: background-color 0.3s;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        .scrollable-history {
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
             max-height: 400px;
-            overflow-y: auto;
         }
-        .text-color-primary { color: var(--text-color); }
-        .bg-card { background-color: var(--card-bg); transition: background-color 0.3s; }
-        .border-color-primary { border-color: var(--border-color); }
-
-        /* Custom Alert */
-        #message-box {
-            position: fixed;
-            top: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            z-index: 1000;
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        /* Gaya khusus untuk slideshow */
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: auto;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .mySlides {
+            display: none;
+            width: 100%;
+            transition: opacity 1s ease-in-out;
             opacity: 0;
-            transition: opacity 0.5s, transform 0.5s;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        #message-box.show {
+        .mySlides.active {
+            display: block;
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
         }
-
-        /* Perbaikan untuk visibilitas input pada mode gelap */
-        [data-theme='dark'] input {
-            color: #f3f4f6;
+        /* Tombol berikutnya & sebelumnya */
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 16px;
+            margin-top: -22px;
+            color: #004080;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.6s ease;
+            user-select: none;
         }
-        input::placeholder {
-            color: #9ca3af;
+        /* Posisikan tombol "next" ke kanan */
+        .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
         }
-        [data-theme='dark'] input::placeholder {
-            color: #d1d5db;
+        /* Saat kursor di atas, tambahkan latar belakang hitam dengan sedikit opasitas */
+        .prev:hover, .next:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        /* Titik-titik/indikator */
+        .dot {
+            cursor: pointer;
+            height: 12px;
+            width: 12px;
+            margin: 0 2px;
+            background-color: #CED4DA;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.6s ease;
+        }
+        .active-dot, .dot:hover {
+            background-color: #007BFF; /* Biru yang lebih terang */
+        }
+        .cta-button {
+            background-image: linear-gradient(to right, #007BFF, #0056B3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
         }
     </style>
 </head>
-<body data-theme="light" class="flex items-center justify-center min-h-screen">
-    
-    <div id="message-box" class="bg-red-500 text-white font-medium"></div>
+<body class="antialiased">
 
-    <div class="container mx-auto p-6 text-color-primary">
-        <!-- Tombol Mode Terang/Gelap dan Reset -->
-        <div class="flex justify-between items-center mb-4">
-            <button id="reset-btn" class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200">
-                Reset
-            </button>
-            <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-                <svg id="sun-icon" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <svg id="moon-icon" class="h-6 w-6 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="text-center mb-4 text-sm text-gray-500 dark:text-gray-400">
-            <p>ID Pengguna: <span id="user-id" class="font-mono text-gray-700 dark:text-gray-300 break-all">Memuat...</span></p>
-        </div>
-
-        <h1 class="text-3xl font-bold text-center mb-6">Powered by Dacuan.com</h1>
-        
-        <!-- Bagian Saldo -->
-        <div class="mb-6 text-white p-6 rounded-xl shadow-md" style="background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));">
-            <h2 class="text-xl font-semibold">Total Saldo</h2>
-            <p id="total-saldo" class="text-4xl font-extrabold mt-2">Rp 0</p>
-            <div class="flex justify-between mt-4 text-sm font-medium">
-                <div>
-                    <span class="block">Pemasukan</span>
-                    <span id="total-pemasukan" class="text-green-200">Rp 0</span>
-                </div>
-                <div>
-                    <span class="block">Pengeluaran</span>
-                    <span id="total-pengeluaran" class="text-red-200">Rp 0</span>
-                </div>
+    <nav class="sticky top-0 z-50 bg-white py-4 border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold tracking-tight text-blue-800">Spreadsheetku.in</a>
+            <div class="hidden md:flex space-x-6 text-gray-600">
+                <a href="#layanan" class="hover:text-blue-700 transition-colors">Layanan</a>
+                <a href="#demo" class="hover:text-blue-700 transition-colors">Demo</a>
+                <a href="#harga" class="hover:text-blue-700 transition-colors">Harga</a>
+                <a href="#proses" class="hover:text-blue-700 transition-colors">Proses</a>
+                <a href="#kontak" class="hover:text-blue-700 transition-colors">Kontak</a>
             </div>
         </div>
+    </nav>
 
-        <!-- Bagian Input Transaksi -->
-        <div class="p-6 bg-card rounded-xl shadow-inner mb-6">
-            <h2 class="text-2xl font-semibold mb-4">Transaksi Baru</h2>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+
+        <header class="text-center py-16 md:py-24">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4 text-blue-900">Jasa Bikin Spreadsheet Keren</h1>
+            <p class="text-lg md:text-xl max-w-2xl mx-auto text-gray-600">Males ribet? Waktunya rapiin data keuangan dan bisnis kamu. Kita bantu bikin spreadsheet kustom, biar data kamu teratur dan anti-pusing.</p>
+            <a href="#harga" class="cta-button mt-8 inline-block font-semibold py-3 px-8 rounded-full text-white">Lihat Paket Harga</a>
+        </header>
+
+        <section id="preview" class="py-12 my-12">
+            <div class="text-center mb-8 px-4">
+                 <h2 class="text-3xl font-semibold mb-4 text-blue-800">Bayangin Spreadsheet Impian Kamu</h2>
+                 <p class="text-lg text-gray-600 max-w-3xl mx-auto">Geser gambar di bawah untuk melihat contoh visualisasi sederhana dari spreadsheet yang bisa kami buatkan.</p>
+            </div>
+            
+            <div class="slideshow-container">
+                <div class="mySlides">
+                    <img class="w-full rounded-md" src="https://placehold.co/900x500/F0F4F8/004080?text=Dashboard+Keuangan+Bulanan" alt="Contoh tampilan dashboard spreadsheet 1">
+                </div>
+                <div class="mySlides">
+                    <img class="w-full rounded-md" src="https://placehold.co/900x500/F0F4F8/004080?text=Manajemen+Stok+Barang" alt="Contoh tampilan dashboard spreadsheet 2">
+                </div>
+                <div class="mySlides">
+                    <img class="w-full rounded-md" src="https://placehold.co/900x500/F0F4F8/004080?text=Laporan+Penjualan" alt="Contoh tampilan dashboard spreadsheet 3">
+                </div>
+                <div class="mySlides">
+                    <img class="w-full rounded-md" src="https://placehold.co/900x500/F0F4F8/004080?text=Database+Klien" alt="Contoh tampilan dashboard spreadsheet 4">
+                </div>
+                
+                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1)">&#10095;</a>
+            </div>
+            <div class="text-center mt-4">
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+                <span class="dot" onclick="currentSlide(4)"></span>
+            </div>
+        </section>
+
+        <section id="layanan" class="py-12">
+            <h2 class="text-3xl font-semibold text-center mb-12 text-blue-800">Apa Aja yang Bisa Kita Bantu?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="card p-6 rounded-md text-center">
+                    <div class="text-4xl mb-4 text-blue-600">📊</div>
+                    <h3 class="text-xl font-semibold mb-2">Laporan Keuangan</h3>
+                    <p class="text-gray-600">Cek pemasukan, pengeluaran, untung-rugi. Langsung beres!</p>
+                </div>
+                <div class="card p-6 rounded-md text-center">
+                    <div class="text-4xl mb-4 text-blue-600">📦</div>
+                    <h3 class="text-xl font-semibold mb-2">Stok Barang</h3>
+                    <p class="text-gray-600">Pantau stok biar nggak kehabisan dan selalu siap jual.</p>
+                </div>
+                <div class="card p-6 rounded-md text-center">
+                    <div class="text-4xl mb-4 text-blue-600">🚀</div>
+                    <h3 class="text-xl font-semibold mb-2">Manajemen Proyek</h3>
+                    <p class="text-gray-600">Atur tugas dan cek progress, biar tim tetap on track.</p>
+                </div>
+                <div class="card p-6 rounded-md text-center">
+                    <div class="text-4xl mb-4 text-blue-600">🗂️</div>
+                    <h3 class="text-xl font-semibold mb-2">Database Kustom</h3>
+                    <p class="text-gray-600">Simpan data klien atau karyawan biar gampang dicari.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="demo" class="py-16 my-12">
+            <div class="text-center mb-8 px-4">
+                 <h2 class="text-3xl font-semibold mb-4 text-blue-800">Lihat Contoh Interaktifnya</h2>
+                 <p class="text-lg text-gray-600 max-w-3xl mx-auto">Ini adalah contoh dashboard sederhana yang bisa kami buatkan untuk Anda. Coba ganti tampilan data dengan memilih opsi di bawah untuk melihat laporan pemasukan atau pengeluaran.</p>
+            </div>
+            <div class="flex justify-center mb-6">
+                <select id="chartFilter" class="p-2 border rounded-md bg-white border-gray-300">
+                    <option value="pemasukan" selected>Pemasukan Bulanan</option>
+                    <option value="pengeluaran">Pengeluaran Bulanan</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <canvas id="demoChart"></canvas>
+            </div>
+        </section>
+
+        <section id="harga" class="py-12">
+            <h2 class="text-3xl font-semibold text-center mb-4 text-blue-800">Harga? Santai...</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-2xl mx-auto">Kami punya paket yang fleksibel, sesuai kebutuhan dan budget kamu.</p>
+            <div class="flex flex-col md:flex-row gap-8 justify-center">
+                
+                <!-- Paket Dasar -->
+                <div class="card p-8 rounded-md md:w-1/2 lg:w-2/5 flex flex-col items-center text-center">
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-800">Paket Dasar</h3>
+                    <p class="text-4xl font-bold mb-6 text-gray-800">Rp250.000</p>
+                    <ul class="space-y-4 text-gray-700 text-left">
+                        <li class="flex items-center"><span class="text-blue-600 mr-2">✓</span>Satu spreadsheet khusus</li>
+                        <li class="flex items-center"><span class="text-blue-600 mr-2">✓</span>Rumus-rumus dasar otomatis</li>
+                        <li class="flex items-center"><span class="text-blue-600 mr-2">✓</span>Desain yang clean dan modern</li>
+                        <li class="flex items-center"><span class="text-blue-600 mr-2">✓</span>Tutorial singkat penggunaan</li>
+                    </ul>
+                </div>
+
+                <!-- Paket Kustom -->
+                <div class="card p-8 rounded-md md:w-1/2 lg:w-2/5 flex flex-col">
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-800">Paket Kustom</h3>
+                    <p class="text-lg text-gray-600 mb-4">Butuh yang lebih canggih? Pilih fitur di bawah untuk estimasi harga.</p>
+                    <div id="custom-options" class="space-y-3">
+                        <label class="flex items-center"><input type="checkbox" class="h-4 w-4 mr-2" data-price="250000">Grafik & Visualisasi Data</label>
+                        <label class="flex items-center"><input type="checkbox" class="h-4 w-4 mr-2" data-price="300000">Otomatisasi Keren (Macro)</label>
+                        <label class="flex items-center"><input type="checkbox" class="h-4 w-4 mr-2" data-price="450000">Terhubung ke Platform Lain</label>
+                        <label class="flex items-center"><input type="checkbox" class="h-4 w-4 mr-2" data-price="200000">Laporan Bulanan Otomatis</label>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-gray-300">
+                        <p class="text-lg font-semibold text-gray-800">Estimasi Harga:</p>
+                        <p id="estimated-price" class="text-3xl font-bold text-gray-800">Rp 500.000+</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="proses" class="py-16">
+            <h2 class="text-3xl font-semibold text-center mb-12 text-blue-800">Gimana Caranya? Gampang!</h2>
+            <div class="relative">
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-px bg-blue-200" style="transform: translateY(-50%);"></div>
+                <div class="relative grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-700 rounded-full text-2xl font-semibold mb-4 z-10">1</div>
+                        <h3 class="text-xl font-semibold mb-2">Ngobrol (Gratis!)</h3>
+                        <p class="text-gray-600">Ceritain aja butuhnya apa. Kita dengerin dan kasih ide terbaik.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-700 rounded-full text-2xl font-semibold mb-4 z-10">2</div>
+                        <h3 class="text-xl font-semibold mb-2">Deal</h3>
+                        <p class="text-gray-600">Setelah harga dan fitur disetujui, kita langsung gas kerjain.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-700 rounded-full text-2xl font-semibold mb-4 z-10">3</div>
+                        <h3 class="text-xl font-semibold mb-2">Bikin</h3>
+                        <p class="text-gray-600">Proses pembuatan dimulai, kamu bisa kasih masukan di tengah jalan.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-700 rounded-full text-2xl font-semibold mb-4 z-10">4</div>
+                        <h3 class="text-xl font-semibold mb-2">Jadi & Kirim</h3>
+                        <p class="text-gray-600">File siap pakai beserta panduannya kita kirimkan ke kamu.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer id="kontak" class="text-center py-16 border-t mt-12 border-gray-200">
+            <h2 class="text-3xl font-semibold text-blue-800">Tertarik? Yuk, Ngobrol!</h2>
+            <p class="text-lg text-gray-600 mt-4 mb-8">Konsultasi gratis kok, jangan ragu buat tanya-tanya.</p>
             <div class="space-y-4">
-                <div>
-                    <label for="jumlah" class="block text-sm font-medium">Jumlah Transaksi (Rp)</label>
-                    <input type="text" id="jumlah" class="mt-1 block w-full px-4 py-2 bg-input border border-color-primary rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-color-primary" placeholder="Contoh: 50000" inputmode="numeric" pattern="[0-9]*">
-                </div>
-                <div>
-                    <label for="keterangan" class="block text-sm font-medium">Keterangan</label>
-                    <input type="text" id="keterangan" class="mt-1 block w-full px-4 py-2 bg-input border border-color-primary rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-color-primary" placeholder="Contoh: Belanja Bulanan">
-                </div>
-                <div class="flex space-x-4">
-                    <button id="tambah-btn" class="flex-1 w-full px-4 py-2 text-white bg-green-600 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        Tambah Saldo
-                    </button>
-                    <button id="kurang-btn" class="flex-1 w-full px-4 py-2 text-white bg-red-600 rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                        Kurangi Saldo
-                    </button>
-                </div>
+                <p class="text-xl font-medium">[Nama Kamu]</p>
+                <p class="text-lg text-gray-800">📞 [Nomor HP/WA]</p>
+                <p class="text-lg text-gray-800">✉️ [Email Kamu]</p>
             </div>
-        </div>
+        </footer>
 
-        <!-- Bagian Riwayat Transaksi -->
-        <div class="p-6 bg-card rounded-xl shadow-inner">
-            <h2 class="text-2xl font-semibold mb-4">Riwayat Transaksi</h2>
-            <div id="riwayat-container" class="scrollable-history space-y-4">
-                <div id="loading-message" class="text-center text-gray-500 py-8">
-                    <p class="mb-2">Sedang memuat data...</p>
-                    <p>Harap tunggu sebentar.</p>
-                </div>
-                <div id="riwayat-empty" class="text-center text-gray-500 py-8 hidden">
-                    <p class="mb-2">Belum ada transaksi.</p>
-                    <p>Mulai catat keuangan Anda!</p>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // Logic for the manual image slideshow
+        let slideIndex = 1;
+        let slideshowInterval;
 
-        // Global variables provided by the Canvas environment.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("mySlides");
+            let dots = document.getElementsByClassName("dot");
+
+            if (n > slides.length) {
+                slideIndex = 1;
+            }
+            if (n < 1) {
+                slideIndex = slides.length;
+            }
+
+            // Hapus kelas 'active' dari semua slide dan titik
+            for (i = 0; i < slides.length; i++) {
+                slides[i].className = slides[i].className.replace(" active", "");
+                dots[i].className = dots[i].className.replace(" active-dot", "");
+            }
+
+            // Tambahkan kelas 'active' ke slide dan titik yang sekarang
+            slides[slideIndex - 1].className += " active";
+            dots[slideIndex - 1].className += " active-dot";
+        }
         
-        // Firebase initialization
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        let userId = null;
+        // Fungsi untuk menggeser slide
+        function plusSlides(n) {
+            showSlides(slideIndex += n);
+            resetSlideshowTimer();
+        }
+        
+        // Fungsi untuk menampilkan slide tertentu
+        function currentSlide(n) {
+            showSlides(slideIndex = n);
+            resetSlideshowTimer();
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const totalSaldoEl = document.getElementById('total-saldo');
-            const totalPemasukanEl = document.getElementById('total-pemasukan');
-            const totalPengeluaranEl = document.getElementById('total-pengeluaran');
-            const jumlahInput = document.getElementById('jumlah');
-            const keteranganInput = document.getElementById('keterangan');
-            const tambahBtn = document.getElementById('tambah-btn');
-            const kurangBtn = document.getElementById('kurang-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const riwayatContainer = document.getElementById('riwayat-container');
-            const riwayatEmptyEl = document.getElementById('riwayat-empty');
-            const loadingMessageEl = document.getElementById('loading-message');
-            const themeToggleBtn = document.getElementById('theme-toggle');
-            const sunIcon = document.getElementById('sun-icon');
-            const moonIcon = document.getElementById('moon-icon');
-            const messageBox = document.getElementById('message-box');
-            const userIdEl = document.getElementById('user-id');
+        // Fungsi untuk memulai timer slideshow otomatis
+        function startSlideshow() {
+            slideshowInterval = setInterval(function() {
+                plusSlides(1);
+            }, 10000); // Ganti gambar setiap 10 detik
+        }
 
-            // Function untuk menampilkan pesan di UI
-            const showMessage = (message, type = 'error') => {
-                messageBox.textContent = message;
-                messageBox.classList.remove('bg-red-500', 'bg-green-500');
-                messageBox.classList.add(type === 'error' ? 'bg-red-500' : 'bg-green-500', 'show');
-                setTimeout(() => {
-                    messageBox.classList.remove('show');
-                }, 3000);
-            };
+        // Fungsi untuk mereset timer
+        function resetSlideshowTimer() {
+            clearInterval(slideshowInterval);
+            startSlideshow();
+        }
 
-            // Function untuk format angka menjadi Rupiah
-            const formatRupiah = (number) => {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0
-                }).format(number);
-            };
+        document.addEventListener('DOMContentLoaded', function () {
+            // Panggil fungsi showSlides untuk pertama kali dan mulai slideshow
+            showSlides(slideIndex);
+            startSlideshow();
 
-            // Logika untuk mode terang dan gelap
-            const toggleTheme = () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                updateIcons(newTheme);
-            };
-
-            const updateIcons = (theme) => {
-                if (theme === 'dark') {
-                    moonIcon.classList.remove('hidden');
-                    sunIcon.classList.add('hidden');
-                } else {
-                    moonIcon.classList.add('hidden');
-                    sunIcon.classList.remove('hidden');
+            // Logic for the interactive chart
+            const chartData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                pemasukan: {
+                    label: 'Pemasukan (juta Rp)',
+                    data: [12, 19, 15, 25, 22, 30],
+                    backgroundColor: 'rgba(0, 123, 255, 0.7)', /* Biru */
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                },
+                pengeluaran: {
+                    label: 'Pengeluaran (juta Rp)',
+                    data: [8, 10, 9, 15, 14, 18],
+                    backgroundColor: 'rgba(108, 117, 125, 0.7)', /* Abu-abu */
+                    borderColor: 'rgba(108, 117, 125, 1)',
                 }
             };
 
-            // Inisialisasi tema saat memuat halaman
-            const savedTheme = 'light'; // Default to light theme for a fresh start
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateIcons(savedTheme);
-            themeToggleBtn.addEventListener('click', toggleTheme);
-
-            // Authentication & data listener
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    userIdEl.textContent = userId;
-                    const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
-                    const q = query(collection(db, transactionsCollectionPath));
-
-                    onSnapshot(q, (snapshot) => {
-                        const riwayatTransaksi = [];
-                        snapshot.forEach((doc) => {
-                            riwayatTransaksi.push({ id: doc.id, ...doc.data() });
-                        });
-                        
-                        // Sort by timestamp if needed, for now Firestore handles order.
-                        updateUI(riwayatTransaksi);
-                        loadingMessageEl.classList.add('hidden');
-                    }, (error) => {
-                        console.error("Error getting transactions: ", error);
-                        showMessage("Gagal memuat data. Periksa koneksi Anda.", "error");
-                        loadingMessageEl.classList.add('hidden');
-                        riwayatEmptyEl.classList.remove('hidden');
-                    });
-                } else {
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
+            const ctx = document.getElementById('demoChart').getContext('2d');
+            let myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [chartData.pemasukan]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#495057', 
+                                callback: function(value) {
+                                    return 'Rp ' + value + ' jt';
+                                }
+                            },
+                            grid: {
+                                color: '#DEE2E6' 
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#495057', 
+                            },
+                             grid: {
+                                color: '#DEE2E6' 
+                            }
                         }
-                    } catch (error) {
-                        console.error("Auth error:", error);
-                        showMessage("Gagal masuk. Silakan coba lagi.", "error");
-                        loadingMessageEl.classList.add('hidden');
-                        riwayatEmptyEl.classList.remove('hidden');
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#212529' 
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 64, 128, 0.9)',
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#FFFFFF',
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(context.parsed.y * 1000000);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
                     }
                 }
             });
 
-            // Function untuk memperbarui UI
-            const updateUI = (riwayatTransaksi) => {
-                let totalSaldo = 0;
-                let totalPemasukan = 0;
-                let totalPengeluaran = 0;
+            document.getElementById('chartFilter').addEventListener('change', function(e) {
+                const selectedData = e.target.value;
+                myChart.data.datasets[0] = chartData[selectedData];
+                myChart.update();
+            });
 
-                // Sort the transactions by timestamp in descending order
-                riwayatTransaksi.sort((a, b) => b.timestamp - a.timestamp);
+            // Logic for the interactive price estimator
+            const customOptions = document.getElementById('custom-options');
+            const estimatedPriceEl = document.getElementById('estimated-price');
+            const baseCustomPrice = 500000;
 
-                riwayatTransaksi.forEach(transaksi => {
-                    if (transaksi.tipe === 'tambah') {
-                        totalSaldo += transaksi.jumlah;
-                        totalPemasukan += transaksi.jumlah;
-                    } else {
-                        totalSaldo -= transaksi.jumlah;
-                        totalPengeluaran += transaksi.jumlah;
-                    }
+            customOptions.addEventListener('change', function() {
+                let currentPrice = baseCustomPrice;
+                const checkedOptions = customOptions.querySelectorAll('input[type="checkbox"]:checked');
+                
+                checkedOptions.forEach(function(checkbox) {
+                    currentPrice += parseInt(checkbox.dataset.price);
                 });
-
-                totalSaldoEl.textContent = formatRupiah(totalSaldo);
-                totalPemasukanEl.textContent = formatRupiah(totalPemasukan);
-                totalPengeluaranEl.textContent = formatRupiah(totalPengeluaran);
                 
-                riwayatContainer.innerHTML = '';
-                if (riwayatTransaksi.length === 0) {
-                    riwayatEmptyEl.classList.remove('hidden');
+                const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(currentPrice);
+
+                if (checkedOptions.length === 0) {
+                     estimatedPriceEl.textContent = `${formattedPrice}+`;
                 } else {
-                    riwayatEmptyEl.classList.add('hidden');
-                    riwayatTransaksi.forEach((transaksi) => {
-                        const isPositive = transaksi.tipe === 'tambah';
-                        const item = document.createElement('div');
-                        item.classList.add('flex', 'justify-between', 'items-center', 'p-4', 'rounded-lg', 'shadow-sm', 'transition-all', 'duration-300', isPositive ? 'bg-green-100' : 'bg-red-100', 'dark:bg-gray-700', 'hover:scale-105');
-                        
-                        const textColorClass = 'dark:text-white';
-                        const keteranganColorClass = 'dark:text-gray-300';
-                        const mutasiSaldo = isPositive ? `+ ${formatRupiah(transaksi.jumlah)}` : `- ${formatRupiah(transaksi.jumlah)}`;
-
-                        item.innerHTML = `
-                            <div class="flex-1">
-                                <p class="text-lg font-semibold text-gray-800 ${textColorClass}">${transaksi.keterangan}</p>
-                                <p class="text-sm text-gray-600 mt-1 ${keteranganColorClass}">${new Date(transaksi.timestamp).toLocaleString('id-ID')}</p>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <div class="text-right">
-                                    <p class="text-lg font-bold ${isPositive ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">${mutasiSaldo}</p>
-                                </div>
-                                <button data-id="${transaksi.id}" class="delete-btn p-2 rounded-full text-red-600 hover:bg-red-200 transition-colors dark:text-red-400 dark:hover:bg-gray-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                            </div>
-                        `;
-                        riwayatContainer.appendChild(item);
-                    });
-                    
-                    document.querySelectorAll('.delete-btn').forEach(button => {
-                        button.addEventListener('click', (e) => {
-                            const id = e.currentTarget.getAttribute('data-id');
-                            deleteTransaction(id);
-                        });
-                    });
+                     estimatedPriceEl.textContent = formattedPrice;
                 }
-            };
-
-            // Function untuk menghapus transaksi
-            const deleteTransaction = async (id) => {
-                const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
-                try {
-                    await deleteDoc(doc(db, transactionsCollectionPath, id));
-                    showMessage('Transaksi berhasil dihapus!', 'success');
-                } catch (e) {
-                    console.error("Error removing document: ", e);
-                    showMessage("Gagal menghapus transaksi.", "error");
-                }
-            };
-
-            // Function untuk menangani transaksi
-            const handleTransaction = async (type) => {
-                const jumlah = parseFloat(jumlahInput.value);
-                const keterangan = keteranganInput.value.trim();
-
-                if (isNaN(jumlah) || jumlah <= 0) {
-                    showMessage('Mohon masukkan jumlah yang valid.');
-                    return;
-                }
-                
-                if (keterangan === '') {
-                    showMessage('Mohon masukkan keterangan transaksi.');
-                    return;
-                }
-
-                if (!userId) {
-                    showMessage("Autentikasi gagal. Silakan muat ulang halaman.", "error");
-                    return;
-                }
-
-                const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
-                const transaksi = {
-                    jumlah: jumlah,
-                    keterangan: keterangan,
-                    tipe: type,
-                    timestamp: Date.now()
-                };
-                
-                try {
-                    await addDoc(collection(db, transactionsCollectionPath), transaksi);
-                    jumlahInput.value = '';
-                    keteranganInput.value = '';
-                    showMessage('Transaksi berhasil!', 'success');
-                } catch (e) {
-                    console.error("Error adding document: ", e);
-                    showMessage("Gagal menyimpan transaksi.", "error");
-                }
-            };
-
-            // Logika untuk mereset semua data
-            const resetData = async () => {
-                if (!userId) {
-                    showMessage("Autentikasi gagal. Tidak dapat mereset data.", "error");
-                    return;
-                }
-
-                const transactionsCollectionPath = `artifacts/${appId}/users/${userId}/transactions`;
-                try {
-                    const q = query(collection(db, transactionsCollectionPath));
-                    const querySnapshot = await getDocs(q);
-                    
-                    if (querySnapshot.empty) {
-                        showMessage('Tidak ada data untuk direset.', 'success');
-                        return;
-                    }
-                    
-                    const batch = db.batch();
-                    querySnapshot.forEach((document) => {
-                        batch.delete(document.ref);
-                    });
-                    await batch.commit();
-                    showMessage('Semua data telah direset!', 'success');
-                } catch (e) {
-                    console.error("Error resetting documents: ", e);
-                    showMessage("Gagal mereset data.", "error");
-                }
-            };
-
-            tambahBtn.addEventListener('click', () => handleTransaction('tambah'));
-            kurangBtn.addEventListener('click', () => handleTransaction('kurang'));
-            resetBtn.addEventListener('click', resetData);
+            });
         });
     </script>
 </body>
